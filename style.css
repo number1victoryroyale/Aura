@@ -449,6 +449,117 @@ body {
   100% { opacity: 0; }
 }
 
+.leaderboard-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.leaderboard-head h2 { margin: 0; }
+
+.lb-rename-btn {
+  background: none;
+  border: none;
+  color: var(--paper-dim);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  padding: 0;
+}
+.lb-rename-btn:hover { color: var(--flame-gold); }
+.lb-rename-btn:focus-visible { outline: 2px solid var(--flame-gold); outline-offset: 2px; }
+
+.leaderboard-join { margin-bottom: 4px; }
+.lb-join-copy {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--paper-dim);
+}
+
+#leaderboard-name-input {
+  flex: 1;
+  background: #00000030;
+  border: 1px solid var(--hairline);
+  color: var(--paper);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 1rem;
+  min-width: 0;
+}
+#leaderboard-name-input:focus-visible {
+  outline: 2px solid var(--flame-gold);
+  outline-offset: 1px;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: #ffffff05;
+}
+.leaderboard-row.you-row {
+  border-color: var(--flame-gold);
+  box-shadow: 0 0 14px #e7b24a22;
+}
+
+.lb-rank {
+  font-family: "IBM Plex Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--paper-dim);
+  width: 2.5em;
+  flex-shrink: 0;
+}
+.leaderboard-row.rank-1 .lb-rank { color: var(--flame-gold); }
+.leaderboard-row.rank-2 .lb-rank { color: #cbd5da; }
+.leaderboard-row.rank-3 .lb-rank { color: #c98a55; }
+
+.lb-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--paper);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.lb-you-tag {
+  color: var(--paper-dim);
+  font-size: 0.78rem;
+}
+
+.lb-aura {
+  font-family: "IBM Plex Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--flame-gold);
+  white-space: nowrap;
+}
+
+.leaderboard-status {
+  color: var(--paper-dim);
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 8px 0 0;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

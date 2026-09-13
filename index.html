@@ -78,11 +78,30 @@
         <h2>Ember Trail</h2>
         <ul id="history-list" class="history-list"></ul>
       </section>
+
+      <section class="panel leaderboard-panel" id="leaderboard-panel" hidden>
+        <div class="leaderboard-head">
+          <h2>Other Flames</h2>
+          <button id="leaderboard-rename-btn" class="lb-rename-btn" type="button">change name</button>
+        </div>
+        <div id="leaderboard-join" class="leaderboard-join" hidden>
+          <p class="lb-join-copy">Name your flame to appear on the shared board:</p>
+          <div class="set-row">
+            <label for="leaderboard-name-input" class="sr-only">Display name</label>
+            <input id="leaderboard-name-input" type="text" placeholder="e.g. Ash" maxlength="24" />
+            <button id="leaderboard-join-btn" class="btn" type="button">Join</button>
+          </div>
+        </div>
+        <ol id="leaderboard-list" class="leaderboard-list" hidden></ol>
+        <p id="leaderboard-status" class="leaderboard-status" hidden></p>
+      </section>
     </main>
   </div>
 
   <div id="impact-banner" class="impact-banner"></div>
 
+  <script src="firebase-config.js"></script>
   <script src="app.js"></script>
+  <script type="module" src="leaderboard.js"></script>
 </body>
 </html>

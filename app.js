@@ -231,6 +231,10 @@
   }
 
   // ---------- Core aura mutation + impact frames ----------
+  function notifyAuraChange() {
+    window.dispatchEvent(new CustomEvent("aura:change", { detail: { aura: state.aura } }));
+  }
+
   function applyDelta(delta, label) {
     if (!delta) return;
     state.aura += delta;
@@ -240,6 +244,7 @@
     renderAuraValue();
     renderHistory();
     playImpact(delta);
+    notifyAuraChange();
   }
 
   function setAuraDirectly(newValue) {
@@ -253,6 +258,7 @@
     renderAuraValue();
     renderHistory();
     playImpact(delta);
+    notifyAuraChange();
   }
 
   function playImpact(delta) {
@@ -415,4 +421,11 @@
 
   // ---------- Init ----------
   renderAll();
+
+  // Small read-only hook for leaderboard.js — kept decoupled so the core
+  // tracker never has to know Firebase (or a leaderboard) exists at all.
+  window.Aura = {
+    getAura: () => state.aura,
+    formatNumber,
+  };
 })();
