@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aura Tracker</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="fx-canvas"></canvas>
+  <div id="flash"></div>
+  <div id="shake-wrap">
+
+    <header class="app-header">
+      <h1>AURA</h1>
+      <p class="subtitle">track your vibe. protect your aura.</p>
+    </header>
+
+    <main class="dashboard">
+      <section class="orb-section">
+        <div id="orb" class="orb">
+          <div class="orb-ring"></div>
+          <div class="orb-core">
+            <div id="aura-value" class="aura-value">0</div>
+            <div class="aura-label">AURA POINTS</div>
+          </div>
+        </div>
+        <div id="tier-label" class="tier-label">Neutral</div>
+      </section>
+
+      <section class="set-panel panel">
+        <h2>Set Aura</h2>
+        <div class="set-row">
+          <input type="number" id="set-input" placeholder="e.g. 500" />
+          <button id="set-btn" class="btn btn-neutral">Set</button>
+        </div>
+        <div class="set-row">
+          <button id="reset-btn" class="btn btn-ghost">Reset to 0</button>
+        </div>
+      </section>
+
+      <section class="actions-grid">
+        <div class="panel actions-panel positive-panel">
+          <h2>✨ Positive Aura</h2>
+          <div id="positive-actions" class="action-list"></div>
+          <button id="add-positive" class="btn btn-add">+ Add custom good deed</button>
+        </div>
+
+        <div class="panel actions-panel negative-panel">
+          <h2>💀 Negative Aura</h2>
+          <div id="negative-actions" class="action-list"></div>
+          <button id="add-negative" class="btn btn-add">+ Add custom cringe act</button>
+        </div>
+      </section>
+
+      <section class="panel history-panel">
+        <h2>History</h2>
+        <ul id="history-list" class="history-list"></ul>
+      </section>
+    </main>
+  </div>
+
+  <div id="impact-banner" class="impact-banner"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
