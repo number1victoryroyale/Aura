@@ -4,37 +4,38 @@
   const STORAGE_KEY = "aura-tracker-state-v2";
 
   const POSITIVE_DEFAULTS = [
-    { label: "Helped a stranger", value: 15 },
-    { label: "Hit the gym", value: 20 },
-    { label: "Ate something healthy", value: 8 },
-    { label: "Got a genuine compliment", value: 10 },
-    { label: "Touched grass", value: 12 },
-    { label: "Did a good deed", value: 25 },
-    { label: "Woke up early with no alarm", value: 10 },
-    { label: "Stayed hydrated all day", value: 5 },
+    { label: "Helped a stranger", value: 18500 },
+    { label: "Hit the gym", value: 42000 },
+    { label: "Ate something healthy", value: 6200 },
+    { label: "Got a genuine compliment", value: 24000 },
+    { label: "Touched grass", value: 31000 },
+    { label: "Did a good deed", value: 250000 },
+    { label: "Woke up early with no alarm", value: 27500 },
+    { label: "Stayed hydrated all day", value: 4800 },
   ];
 
   const NEGATIVE_DEFAULTS = [
-    { label: "Rage quit a game", value: -15 },
-    { label: "Ghosted someone", value: -12 },
-    { label: "Was rude to someone", value: -18 },
-    { label: "Doom scrolled for hours", value: -10 },
-    { label: "Overslept and missed something", value: -8 },
-    { label: "Got clowned on publicly", value: -22 },
-    { label: "Lied about something small", value: -14 },
-    { label: "Left dishes in the sink", value: -5 },
+    { label: "Rage quit a game", value: -35000 },
+    { label: "Ghosted someone", value: -28000 },
+    { label: "Was rude to someone", value: -47000 },
+    { label: "Doom scrolled for hours", value: -21000 },
+    { label: "Overslept and missed something", value: -16500 },
+    { label: "Got clowned on publicly", value: -500000 },
+    { label: "Lied about something small", value: -33000 },
+    { label: "Left dishes in the sink", value: -9200 },
   ];
 
   // The flame metaphor: aura is a fire you tend. It can go out entirely
   // (Fractured/Clouded), sit unlit at baseline (Dormant), catch (Kindled),
-  // burn bright (Luminous), or become pure light (Transcendent).
+  // burn bright (Luminous), or become pure light (Transcendent). Thresholds
+  // are scaled to match how wildly a single act can swing the flame.
   const TIERS = [
-    { min: -Infinity, max: -50, label: "Fractured", color: "#b23b4f", glow: "#b23b4f99" },
-    { min: -50, max: 0, label: "Clouded", color: "#c96a78", glow: "#c96a7877" },
-    { min: 0, max: 50, label: "Dormant", color: "#8a6fe0", glow: "#8a6fe066" },
-    { min: 50, max: 150, label: "Kindled", color: "#e7b24a", glow: "#e7b24a88" },
-    { min: 150, max: 300, label: "Luminous", color: "#4fae8f", glow: "#4fae8f88" },
-    { min: 300, max: Infinity, label: "Transcendent", color: "#fff3dc", glow: "#fff3dcaa" },
+    { min: -Infinity, max: -300000, label: "Fractured", color: "#b23b4f", glow: "#b23b4f99" },
+    { min: -300000, max: 0, label: "Clouded", color: "#c96a78", glow: "#c96a7877" },
+    { min: 0, max: 100000, label: "Dormant", color: "#8a6fe0", glow: "#8a6fe066" },
+    { min: 100000, max: 500000, label: "Kindled", color: "#e7b24a", glow: "#e7b24a88" },
+    { min: 500000, max: 2000000, label: "Luminous", color: "#4fae8f", glow: "#4fae8f88" },
+    { min: 2000000, max: Infinity, label: "Transcendent", color: "#fff3dc", glow: "#fff3dcaa" },
   ];
 
   function loadState() {
@@ -98,6 +99,10 @@
     return TIERS.find((t) => value < t.max) || TIERS[TIERS.length - 1];
   }
 
+  function formatDelta(n) {
+    return (n > 0 ? "+" : "") + n.toLocaleString();
+  }
+
   function updateDial() {
     const tier = getTier(state.aura);
     orbEl.style.setProperty("--tier-color", tier.color);
@@ -147,7 +152,7 @@
 
       const value = document.createElement("span");
       value.className = "value";
-      value.textContent = (action.value > 0 ? "+" : "") + action.value;
+      value.textContent = formatDelta(action.value);
 
       item.appendChild(label);
       item.appendChild(value);
@@ -194,7 +199,7 @@
         label.textContent = entry.label;
         const delta = document.createElement("span");
         delta.className = "delta " + (entry.delta >= 0 ? "pos" : "neg");
-        delta.textContent = (entry.delta >= 0 ? "+" : "") + entry.delta;
+        delta.textContent = formatDelta(entry.delta);
         li.appendChild(label);
         li.appendChild(delta);
         historyListEl.appendChild(li);
@@ -236,7 +241,7 @@
   function playImpact(delta) {
     const good = delta > 0;
     const magnitude = Math.abs(delta);
-    const intensity = Math.min(1, magnitude / 30);
+    const intensity = Math.min(1, magnitude / 400000);
 
     auraValueEl.classList.remove("bump-up", "bump-down");
     void auraValueEl.offsetWidth;
@@ -250,7 +255,7 @@
     void flashEl.offsetWidth;
     flashEl.classList.add(good ? "flash-good" : "flash-bad");
 
-    impactBanner.textContent = (good ? "+" : "") + delta;
+    impactBanner.textContent = formatDelta(delta);
     impactBanner.classList.remove("play-good", "play-bad");
     void impactBanner.offsetWidth;
     impactBanner.classList.add(good ? "play-good" : "play-bad");

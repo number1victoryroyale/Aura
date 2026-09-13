@@ -183,7 +183,7 @@ body {
 .aura-value {
   font-family: "IBM Plex Mono", monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 2.9rem;
+  font-size: clamp(1.5rem, 7.5vw, 2.5rem);
   font-weight: 600;
   color: var(--tier-color, var(--flame-violet));
   text-shadow: 0 0 20px var(--tier-glow, #8a6fe066);
@@ -404,8 +404,8 @@ body {
   z-index: 70;
   font-family: "Cinzel", serif;
   font-weight: 700;
-  font-size: clamp(2.4rem, 9vw, 5.5rem);
-  letter-spacing: 0.04em;
+  font-size: clamp(1.7rem, 9vw, 5.5rem);
+  letter-spacing: 0.02em;
   pointer-events: none;
   text-align: center;
   white-space: nowrap;
