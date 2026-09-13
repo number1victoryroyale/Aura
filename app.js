@@ -5,11 +5,11 @@
 
   const POSITIVE_DEFAULTS = [
     { label: "Helped a stranger", value: 18500 },
-    { label: "Hit the gym", value: 42000 },
+    { label: "Hit the gym", value: 30000 },
     { label: "Ate something healthy", value: 6200 },
     { label: "Got a genuine compliment", value: 24000 },
-    { label: "Touched grass", value: 31000 },
-    { label: "Did a good deed", value: 250000 },
+    { label: "Touched grass", value: 28000 },
+    { label: "Did a good deed", value: 30000 },
     { label: "Woke up early with no alarm", value: 27500 },
     { label: "Stayed hydrated all day", value: 4800 },
   ];
@@ -388,8 +388,14 @@
     }, ACTION_COOLDOWN_MS);
   }
 
+  // No single kindling act can ever apply more than this — enforced here,
+  // not just at the data/creation level, so it holds even against a
+  // tampered custom action or corrupted storage.
+  const KINDLE_APPLY_MAX = 30_000;
+
   function applyDelta(delta, label) {
     if (!delta || isOnCooldown()) return;
+    if (delta > 0) delta = Math.min(delta, KINDLE_APPLY_MAX);
     state.aura += delta;
     state.history.push({ label, delta, at: Date.now() });
     if (state.history.length > 200) state.history = state.history.slice(-200);
@@ -531,17 +537,19 @@
   }
 
   // ---------- Custom action creation ----------
-  // Bounded to the same order of magnitude as the built-in actions, so a
-  // custom action can't become a backdoor for setting aura to anything.
+  // Bounded so a custom action can't become a backdoor for setting aura to
+  // anything: kindling tops out at KINDLE_APPLY_MAX (same ceiling every
+  // other kindling act is held to); smothering keeps the wider range.
   const CUSTOM_ACTION_MIN = 100;
-  const CUSTOM_ACTION_MAX = 1_000_000;
+  const CUSTOM_SMOTHER_MAX = 1_000_000;
 
   function addCustomAction(isPositive) {
     const label = prompt(
       isPositive ? "What did you do to kindle your flame?" : "What did you do to smother it?"
     );
     if (!label || !label.trim()) return;
-    const range = `${CUSTOM_ACTION_MIN.toLocaleString()}–${CUSTOM_ACTION_MAX.toLocaleString()}`;
+    const max = isPositive ? KINDLE_APPLY_MAX : CUSTOM_SMOTHER_MAX;
+    const range = `${CUSTOM_ACTION_MIN.toLocaleString()}–${max.toLocaleString()}`;
     const raw = prompt(
       isPositive
         ? `How much aura does that kindle? (${range})`
@@ -549,7 +557,7 @@
     );
     let num = parseInt(raw, 10);
     if (isNaN(num) || num === 0) return;
-    num = Math.min(CUSTOM_ACTION_MAX, Math.max(CUSTOM_ACTION_MIN, Math.abs(num)));
+    num = Math.min(max, Math.max(CUSTOM_ACTION_MIN, Math.abs(num)));
     const value = isPositive ? num : -num;
     const list = isPositive ? state.customPositive : state.customNegative;
     list.push({ label: label.trim(), value });
