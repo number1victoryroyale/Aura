@@ -99,8 +99,25 @@
     return TIERS.find((t) => value < t.max) || TIERS[TIERS.length - 1];
   }
 
+  // Past a million, plain digits stop being readable at a glance —
+  // switch to "m.mm×10ⁿ" instead of a wall of commas.
+  const SCI_NOTATION_THRESHOLD = 1_000_000;
+  const SUPERSCRIPT_DIGITS = { "0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","-":"⁻","+":"" };
+
+  function toSuperscript(str) {
+    return str.split("").map((c) => SUPERSCRIPT_DIGITS[c] ?? c).join("");
+  }
+
+  function formatNumber(n) {
+    if (Math.abs(n) >= SCI_NOTATION_THRESHOLD) {
+      const [mantissa, exponent] = n.toExponential(2).split("e");
+      return mantissa + "×10" + toSuperscript(exponent);
+    }
+    return n.toLocaleString();
+  }
+
   function formatDelta(n) {
-    return (n > 0 ? "+" : "") + n.toLocaleString();
+    return (n > 0 ? "+" : "") + formatNumber(n);
   }
 
   function updateDial() {
@@ -121,7 +138,7 @@
   }
 
   function renderAuraValue() {
-    auraValueEl.textContent = state.aura.toLocaleString();
+    auraValueEl.textContent = formatNumber(state.aura);
     updateDial();
   }
 
