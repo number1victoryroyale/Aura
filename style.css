@@ -226,6 +226,10 @@ body {
   transition: all 0.5s ease;
 }
 
+.reset-btn {
+  margin-top: 4px;
+}
+
 .panel {
   background: linear-gradient(180deg, var(--ink-raised), var(--ink-raised-2));
   border: 1px solid var(--hairline);
@@ -248,21 +252,6 @@ body {
   margin-bottom: 10px;
 }
 .set-row:last-child { margin-bottom: 0; }
-
-#set-input {
-  flex: 1;
-  background: #00000030;
-  border: 1px solid var(--hairline);
-  color: var(--paper);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 1rem;
-}
-#set-input:focus-visible {
-  outline: 2px solid var(--flame-gold);
-  outline-offset: 1px;
-}
 
 .btn {
   border: none;
@@ -329,6 +318,14 @@ body {
 }
 .action-item:focus-visible { outline: 2px solid var(--flame-gold); outline-offset: 2px; }
 .action-item:active { transform: scale(0.97); }
+
+/* A brief cooldown after every act keeps any one flame from being tapped
+   into the stratosphere by spam-clicking. */
+body.on-cooldown .action-item {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: saturate(0.6);
+}
 
 /* Kindling: soft, rounded, warm — a lit candle */
 .kindle-panel .action-item {

@@ -76,8 +76,6 @@
   const positiveListEl = document.getElementById("positive-actions");
   const negativeListEl = document.getElementById("negative-actions");
   const historyListEl = document.getElementById("history-list");
-  const setInput = document.getElementById("set-input");
-  const setBtn = document.getElementById("set-btn");
   const resetBtn = document.getElementById("reset-btn");
   const addPositiveBtn = document.getElementById("add-positive");
   const addNegativeBtn = document.getElementById("add-negative");
@@ -239,8 +237,27 @@
     window.dispatchEvent(new CustomEvent("aura:change", { detail: { aura: state.aura } }));
   }
 
+  // A short cooldown after every act — no farming a leaderboard by
+  // spam-clicking a button as fast as your mouse allows.
+  const ACTION_COOLDOWN_MS = 1000;
+  let cooldownUntil = 0;
+  let cooldownTimer = null;
+
+  function isOnCooldown() {
+    return Date.now() < cooldownUntil;
+  }
+
+  function startCooldown() {
+    cooldownUntil = Date.now() + ACTION_COOLDOWN_MS;
+    document.body.classList.add("on-cooldown");
+    clearTimeout(cooldownTimer);
+    cooldownTimer = setTimeout(() => {
+      document.body.classList.remove("on-cooldown");
+    }, ACTION_COOLDOWN_MS);
+  }
+
   function applyDelta(delta, label) {
-    if (!delta) return;
+    if (!delta || isOnCooldown()) return;
     state.aura += delta;
     state.history.push({ label, delta, at: Date.now() });
     if (state.history.length > 200) state.history = state.history.slice(-200);
@@ -249,14 +266,16 @@
     renderHistory();
     playImpact(delta);
     notifyAuraChange();
+    startCooldown();
   }
 
-  function setAuraDirectly(newValue) {
-    const before = state.aura;
-    const delta = newValue - before;
+  // The only way aura is ever reset to a chosen value — always 0, never
+  // arbitrary, so there's no backdoor around tapping actions to earn it.
+  function resetAura() {
+    const delta = 0 - state.aura;
     if (delta === 0) return;
-    state.aura = newValue;
-    state.history.push({ label: "Set by hand", delta, at: Date.now() });
+    state.aura = 0;
+    state.history.push({ label: "Snuffed out", delta, at: Date.now() });
     if (state.history.length > 200) state.history = state.history.slice(-200);
     saveState();
     renderAuraValue();
@@ -380,19 +399,25 @@
   }
 
   // ---------- Custom action creation ----------
+  // Bounded to the same order of magnitude as the built-in actions, so a
+  // custom action can't become a backdoor for setting aura to anything.
+  const CUSTOM_ACTION_MIN = 100;
+  const CUSTOM_ACTION_MAX = 1_000_000;
+
   function addCustomAction(isPositive) {
     const label = prompt(
       isPositive ? "What did you do to kindle your flame?" : "What did you do to smother it?"
     );
     if (!label || !label.trim()) return;
+    const range = `${CUSTOM_ACTION_MIN.toLocaleString()}–${CUSTOM_ACTION_MAX.toLocaleString()}`;
     const raw = prompt(
       isPositive
-        ? "How much aura does that kindle? (positive number)"
-        : "How much aura does that smother? (positive number, will be subtracted)"
+        ? `How much aura does that kindle? (${range})`
+        : `How much aura does that smother? (${range}, will be subtracted)`
     );
     let num = parseInt(raw, 10);
     if (isNaN(num) || num === 0) return;
-    num = Math.abs(num);
+    num = Math.min(CUSTOM_ACTION_MAX, Math.max(CUSTOM_ACTION_MIN, Math.abs(num)));
     const value = isPositive ? num : -num;
     const list = isPositive ? state.customPositive : state.customNegative;
     list.push({ label: label.trim(), value });
@@ -401,22 +426,9 @@
   }
 
   // ---------- Events ----------
-  setBtn.addEventListener("click", () => {
-    const raw = setInput.value.trim();
-    if (raw === "") return;
-    const num = parseInt(raw, 10);
-    if (isNaN(num)) return;
-    setAuraDirectly(num);
-    setInput.value = "";
-  });
-
-  setInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") setBtn.click();
-  });
-
   resetBtn.addEventListener("click", () => {
     if (confirm("Snuff the flame out and reset your aura to 0? History stays.")) {
-      setAuraDirectly(0);
+      resetAura();
     }
   });
 
