@@ -25,17 +25,21 @@
     { label: "Left dishes in the sink", value: -9200 },
   ];
 
-  // The flame metaphor: aura is a fire you tend. It can go out entirely
-  // (Fractured/Clouded), sit unlit at baseline (Dormant), catch (Kindled),
-  // burn bright (Luminous), or become pure light (Transcendent). Thresholds
-  // are scaled to match how wildly a single act can swing the flame.
+  // The flame metaphor: aura is a fire you tend, and it can travel a long
+  // way in either direction — from utterly snuffed out to pure light. Each
+  // rank is a decade (10x) wide so the climb stays meaningful all the way
+  // out to where the readout switches to scientific notation.
   const TIERS = [
-    { min: -Infinity, max: -300000, label: "Fractured", color: "#b23b4f", glow: "#b23b4f99" },
-    { min: -300000, max: 0, label: "Clouded", color: "#c96a78", glow: "#c96a7877" },
-    { min: 0, max: 100000, label: "Dormant", color: "#8a6fe0", glow: "#8a6fe066" },
-    { min: 100000, max: 500000, label: "Kindled", color: "#e7b24a", glow: "#e7b24a88" },
-    { min: 500000, max: 2000000, label: "Luminous", color: "#4fae8f", glow: "#4fae8f88" },
-    { min: 2000000, max: Infinity, label: "Transcendent", color: "#fff3dc", glow: "#fff3dcaa" },
+    { min: -Infinity, max: -1e8, label: "Extinguished", color: "#3a3242", glow: "#3a324299" },
+    { min: -1e8, max: -1e7, label: "Fractured", color: "#8a4550", glow: "#8a455099" },
+    { min: -1e7, max: -1e6, label: "Charred", color: "#b23b4f", glow: "#b23b4f99" },
+    { min: -1e6, max: 0, label: "Clouded", color: "#c96a78", glow: "#c96a7877" },
+    { min: 0, max: 1e6, label: "Dormant", color: "#8a6fe0", glow: "#8a6fe066" },
+    { min: 1e6, max: 1e7, label: "Kindled", color: "#e7b24a", glow: "#e7b24a88" },
+    { min: 1e7, max: 1e8, label: "Blazing", color: "#f2874a", glow: "#f2874a88" },
+    { min: 1e8, max: 1e9, label: "Luminous", color: "#4fae8f", glow: "#4fae8f88" },
+    { min: 1e9, max: 1e10, label: "Radiant", color: "#8fe0c2", glow: "#8fe0c288" },
+    { min: 1e10, max: Infinity, label: "Transcendent", color: "#fff3dc", glow: "#fff3dcaa" },
   ];
 
   function loadState() {
@@ -99,9 +103,9 @@
     return TIERS.find((t) => value < t.max) || TIERS[TIERS.length - 1];
   }
 
-  // Past a million, plain digits stop being readable at a glance —
+  // Past ten billion, plain digits stop being readable at a glance —
   // switch to "m.mm×10ⁿ" instead of a wall of commas.
-  const SCI_NOTATION_THRESHOLD = 1_000_000;
+  const SCI_NOTATION_THRESHOLD = 1e10;
   const SUPERSCRIPT_DIGITS = { "0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","-":"⁻","+":"" };
 
   function toSuperscript(str) {
