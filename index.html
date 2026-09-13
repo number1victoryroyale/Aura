@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Aura Tracker</title>
+<title>Aura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -13,48 +16,66 @@
 
     <header class="app-header">
       <h1>AURA</h1>
-      <p class="subtitle">track your vibe. protect your aura.</p>
+      <p class="subtitle">an instrument for tending your inner flame</p>
     </header>
 
     <main class="dashboard">
       <section class="orb-section">
         <div id="orb" class="orb">
-          <div class="orb-ring"></div>
-          <div class="orb-core">
+          <svg class="dial-ring" viewBox="0 0 100 100">
+            <circle class="dial-track" cx="50" cy="50" r="44"></circle>
+            <circle id="dial-progress" class="dial-progress" cx="50" cy="50" r="44"></circle>
+            <g class="dial-ticks">
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(0 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(30 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(60 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(90 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(120 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(150 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(180 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(210 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(240 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(270 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(300 50 50)"></line>
+              <line x1="50" y1="3" x2="50" y2="9" transform="rotate(330 50 50)"></line>
+            </g>
+          </svg>
+          <div class="dial-core">
             <div id="aura-value" class="aura-value">0</div>
-            <div class="aura-label">AURA POINTS</div>
+            <div class="aura-label">AURA</div>
           </div>
         </div>
-        <div id="tier-label" class="tier-label">Neutral</div>
+        <div id="tier-label" class="tier-label">Dormant</div>
       </section>
 
       <section class="set-panel panel">
-        <h2>Set Aura</h2>
+        <h2>Set the Flame</h2>
         <div class="set-row">
+          <label for="set-input" class="sr-only">Set aura to a specific value</label>
           <input type="number" id="set-input" placeholder="e.g. 500" />
-          <button id="set-btn" class="btn btn-neutral">Set</button>
+          <button id="set-btn" class="btn">Set</button>
         </div>
         <div class="set-row">
-          <button id="reset-btn" class="btn btn-ghost">Reset to 0</button>
+          <button id="reset-btn" class="btn btn-ghost">Snuff out (reset to 0)</button>
         </div>
       </section>
 
       <section class="actions-grid">
-        <div class="panel actions-panel positive-panel">
-          <h2>✨ Positive Aura</h2>
+        <div class="panel actions-panel kindle-panel">
+          <h2>Kindling</h2>
           <div id="positive-actions" class="action-list"></div>
-          <button id="add-positive" class="btn btn-add">+ Add custom good deed</button>
+          <button id="add-positive" class="btn btn-add">+ Add a kindling act</button>
         </div>
 
-        <div class="panel actions-panel negative-panel">
-          <h2>💀 Negative Aura</h2>
+        <div class="panel actions-panel smother-panel">
+          <h2>Smothering</h2>
           <div id="negative-actions" class="action-list"></div>
-          <button id="add-negative" class="btn btn-add">+ Add custom cringe act</button>
+          <button id="add-negative" class="btn btn-add">+ Add a smothering act</button>
         </div>
       </section>
 
       <section class="panel history-panel">
-        <h2>History</h2>
+        <h2>Ember Trail</h2>
         <ul id="history-list" class="history-list"></ul>
       </section>
     </main>
