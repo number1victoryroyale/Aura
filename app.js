@@ -26,22 +26,37 @@
   ];
 
   // A smooth gradient spanning every rank: void-black -> crimson -> the
-  // violet baseline -> gold -> jade -> pure light. Colors are generated
-  // from these stops rather than hand-picked per rank, so the many tiers
-  // below read as one continuous spectrum instead of a patchwork — and
-  // adding still more ranks later never means guessing a new hue.
+  // violet baseline -> gold -> jade -> pure light -> an ethereal glow
+  // beyond it. Stops are keyed to a FIXED signed order-of-magnitude (not
+  // to a rank's position in the list), so a rank's color depends only on
+  // its own numbers and never shifts when more ranks are added elsewhere.
   const TIER_COLOR_STOPS = [
-    [0.0, "#1f1a26"],
-    [0.14, "#8a4550"],
-    [0.28, "#b23b4f"],
-    [0.4, "#c96a78"],
-    [0.5, "#8a6fe0"],
-    [0.6, "#e7b24a"],
-    [0.72, "#f2874a"],
-    [0.84, "#4fae8f"],
-    [0.93, "#8fe0c2"],
-    [1.0, "#fff3dc"],
+    [-11, "#141019"],
+    [-10, "#1f1a26"],
+    [-8, "#8a4550"],
+    [-6, "#b23b4f"],
+    [-4, "#c96a78"],
+    [4, "#8a6fe0"],
+    [6, "#e7b24a"],
+    [8, "#f2874a"],
+    [9.5, "#4fae8f"],
+    [10.5, "#fff3dc"],
+    [11.5, "#cfe8ff"],
+    [13, "#e3d1ff"],
+    [14.5, "#ffe0f2"],
+    [16, "#ffffff"],
   ];
+
+  // A rank's position on that fixed scale, derived from its own bounds:
+  // positive ranks key off their upper edge, negative ranks off their
+  // (more extreme) lower edge, and the two open ends get pushed one unit
+  // past their neighbor so they never collide with it.
+  function tierPosition(min, max) {
+    if (max === Infinity) return Math.log10(min) + 1;
+    if (min === -Infinity) return -Math.log10(-max) - 1;
+    if (min >= 0) return Math.log10(max);
+    return -Math.log10(-min);
+  }
 
   // Interpolated in HSL, not RGB: a straight RGB blend between, say,
   // violet and gold desaturates through a muddy grey-pink at the
@@ -88,13 +103,15 @@
     if (d < -180) d += 360;
     return (h0 + d * t + 360) % 360;
   }
-  function tierColorAt(t) {
-    t = Math.min(1, Math.max(0, t));
-    for (let i = 0; i < TIER_COLOR_STOPS.length - 1; i++) {
-      const [t0, c0] = TIER_COLOR_STOPS[i];
-      const [t1, c1] = TIER_COLOR_STOPS[i + 1];
-      if (t <= t1) {
-        const localT = t1 === t0 ? 0 : (t - t0) / (t1 - t0);
+  function tierColorAt(pos) {
+    const stops = TIER_COLOR_STOPS;
+    if (pos <= stops[0][0]) return stops[0][1];
+    if (pos >= stops[stops.length - 1][0]) return stops[stops.length - 1][1];
+    for (let i = 0; i < stops.length - 1; i++) {
+      const [p0, c0] = stops[i];
+      const [p1, c1] = stops[i + 1];
+      if (pos <= p1) {
+        const localT = p1 === p0 ? 0 : (pos - p0) / (p1 - p0);
         const [h0, s0, l0] = rgbToHsl(hexToRgb(c0));
         const [h1, s1, l1] = rgbToHsl(hexToRgb(c1));
         const h = lerpHue(h0, h1, localT);
@@ -103,7 +120,7 @@
         return rgbToHex(hslToRgb(h, s, l));
       }
     }
-    return TIER_COLOR_STOPS[TIER_COLOR_STOPS.length - 1][1];
+    return stops[stops.length - 1][1];
   }
 
   // The flame metaphor: aura is a fire you tend, and it can travel a long
@@ -139,11 +156,21 @@
     ["Incandescent", 3e8, 1e9],
     ["Stellar", 1e9, 3e9],
     ["Celestial", 3e9, 1e10],
-    ["Transcendent", 1e10, Infinity],
+    ["Transcendent", 1e10, 3e10],
+    ["Ascendant", 3e10, 1e11],
+    ["Empyrean", 1e11, 3e11],
+    ["Eternal", 3e11, 1e12],
+    ["Sovereign", 1e12, 3e12],
+    ["Primordial", 3e12, 1e13],
+    ["Absolute", 1e13, 3e13],
+    ["Ineffable", 3e13, 1e14],
+    ["Omniscient", 1e14, 3e14],
+    ["Infinite", 3e14, 1e15],
+    ["Boundless", 1e15, Infinity],
   ];
 
-  const TIERS = TIER_BOUNDS.map(([label, min, max], i) => {
-    const color = tierColorAt(i / (TIER_BOUNDS.length - 1));
+  const TIERS = TIER_BOUNDS.map(([label, min, max]) => {
+    const color = tierColorAt(tierPosition(min, max));
     return { min, max, label, color, glow: color + "88" };
   });
 
