@@ -25,22 +25,127 @@
     { label: "Left dishes in the sink", value: -9200 },
   ];
 
-  // The flame metaphor: aura is a fire you tend, and it can travel a long
-  // way in either direction — from utterly snuffed out to pure light. Each
-  // rank is a decade (10x) wide so the climb stays meaningful all the way
-  // out to where the readout switches to scientific notation.
-  const TIERS = [
-    { min: -Infinity, max: -1e8, label: "Extinguished", color: "#3a3242", glow: "#3a324299" },
-    { min: -1e8, max: -1e7, label: "Fractured", color: "#8a4550", glow: "#8a455099" },
-    { min: -1e7, max: -1e6, label: "Charred", color: "#b23b4f", glow: "#b23b4f99" },
-    { min: -1e6, max: 0, label: "Clouded", color: "#c96a78", glow: "#c96a7877" },
-    { min: 0, max: 1e6, label: "Dormant", color: "#8a6fe0", glow: "#8a6fe066" },
-    { min: 1e6, max: 1e7, label: "Kindled", color: "#e7b24a", glow: "#e7b24a88" },
-    { min: 1e7, max: 1e8, label: "Blazing", color: "#f2874a", glow: "#f2874a88" },
-    { min: 1e8, max: 1e9, label: "Luminous", color: "#4fae8f", glow: "#4fae8f88" },
-    { min: 1e9, max: 1e10, label: "Radiant", color: "#8fe0c2", glow: "#8fe0c288" },
-    { min: 1e10, max: Infinity, label: "Transcendent", color: "#fff3dc", glow: "#fff3dcaa" },
+  // A smooth gradient spanning every rank: void-black -> crimson -> the
+  // violet baseline -> gold -> jade -> pure light. Colors are generated
+  // from these stops rather than hand-picked per rank, so the many tiers
+  // below read as one continuous spectrum instead of a patchwork — and
+  // adding still more ranks later never means guessing a new hue.
+  const TIER_COLOR_STOPS = [
+    [0.0, "#1f1a26"],
+    [0.14, "#8a4550"],
+    [0.28, "#b23b4f"],
+    [0.4, "#c96a78"],
+    [0.5, "#8a6fe0"],
+    [0.6, "#e7b24a"],
+    [0.72, "#f2874a"],
+    [0.84, "#4fae8f"],
+    [0.93, "#8fe0c2"],
+    [1.0, "#fff3dc"],
   ];
+
+  // Interpolated in HSL, not RGB: a straight RGB blend between, say,
+  // violet and gold desaturates through a muddy grey-pink at the
+  // midpoint. Blending hue around the color wheel instead keeps every
+  // in-between rank looking like a deliberate color, not a smudge.
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function rgbToHex(rgb) {
+    return "#" + rgb.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+  }
+  function rgbToHsl([r, g, b]) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    if (max === min) return [0, 0, l * 100];
+    const d = max - min;
+    const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    let h;
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    return [h * 60, s * 100, l * 100];
+  }
+  function hslToRgb(h, s, l) {
+    h /= 360; s /= 100; l /= 100;
+    if (s === 0) return [l * 255, l * 255, l * 255];
+    const hue2rgb = (p, q, tt) => {
+      if (tt < 0) tt += 1;
+      if (tt > 1) tt -= 1;
+      if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+      if (tt < 1 / 2) return q;
+      if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    return [hue2rgb(p, q, h + 1 / 3) * 255, hue2rgb(p, q, h) * 255, hue2rgb(p, q, h - 1 / 3) * 255];
+  }
+  function lerpHue(h0, h1, t) {
+    let d = h1 - h0;
+    if (d > 180) d -= 360;
+    if (d < -180) d += 360;
+    return (h0 + d * t + 360) % 360;
+  }
+  function tierColorAt(t) {
+    t = Math.min(1, Math.max(0, t));
+    for (let i = 0; i < TIER_COLOR_STOPS.length - 1; i++) {
+      const [t0, c0] = TIER_COLOR_STOPS[i];
+      const [t1, c1] = TIER_COLOR_STOPS[i + 1];
+      if (t <= t1) {
+        const localT = t1 === t0 ? 0 : (t - t0) / (t1 - t0);
+        const [h0, s0, l0] = rgbToHsl(hexToRgb(c0));
+        const [h1, s1, l1] = rgbToHsl(hexToRgb(c1));
+        const h = lerpHue(h0, h1, localT);
+        const s = s0 + (s1 - s0) * localT;
+        const l = l0 + (l1 - l0) * localT;
+        return rgbToHex(hslToRgb(h, s, l));
+      }
+    }
+    return TIER_COLOR_STOPS[TIER_COLOR_STOPS.length - 1][1];
+  }
+
+  // The flame metaphor: aura is a fire you tend, and it can travel a long
+  // way in either direction — from utterly snuffed out to pure light. Ranks
+  // are spaced about two to a decade (…, 1e4, 3e4, 1e5, 3e5, …) so a single
+  // big action can still visibly climb a rank, all the way out to where the
+  // readout switches to scientific notation.
+  const TIER_BOUNDS = [
+    ["Extinguished", -Infinity, -1e10],
+    ["Void", -1e10, -3e9],
+    ["Hollow", -3e9, -1e9],
+    ["Withered", -1e9, -3e8],
+    ["Corroded", -3e8, -1e8],
+    ["Cracked", -1e8, -3e7],
+    ["Fractured", -3e7, -1e7],
+    ["Charred", -1e7, -3e6],
+    ["Choking", -3e6, -1e6],
+    ["Smothered", -1e6, -3e5],
+    ["Waning", -3e5, -1e5],
+    ["Fading", -1e5, -3e4],
+    ["Dimming", -3e4, -1e4],
+    ["Clouded", -1e4, 0],
+    ["Dormant", 0, 1e4],
+    ["Ember", 1e4, 3e4],
+    ["Smoldering", 3e4, 1e5],
+    ["Kindled", 1e5, 3e5],
+    ["Burning", 3e5, 1e6],
+    ["Blazing", 1e6, 3e6],
+    ["Ablaze", 3e6, 1e7],
+    ["Roaring", 1e7, 3e7],
+    ["Radiant", 3e7, 1e8],
+    ["Luminous", 1e8, 3e8],
+    ["Incandescent", 3e8, 1e9],
+    ["Stellar", 1e9, 3e9],
+    ["Celestial", 3e9, 1e10],
+    ["Transcendent", 1e10, Infinity],
+  ];
+
+  const TIERS = TIER_BOUNDS.map(([label, min, max], i) => {
+    const color = tierColorAt(i / (TIER_BOUNDS.length - 1));
+    return { min, max, label, color, glow: color + "88" };
+  });
 
   function loadState() {
     try {
